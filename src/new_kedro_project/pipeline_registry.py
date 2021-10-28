@@ -27,12 +27,17 @@
 # limitations under the License.
 
 """Project pipelines."""
+from functools import reduce
+from operator import add
 from typing import Dict
 
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
+from kedro.symphony.conductor import DEFAULT_EXECUTOR
 
 from new_kedro_project.pipelines import data_engineering as de
 from new_kedro_project.pipelines import data_science as ds
+
+DASK_EXECUTOR = "executor:kedro.symphony.executor.dask_executor.DaskExecutor"
 
 
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -48,5 +53,25 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return {
         "de": data_engineering_pipeline,
         "ds": data_science_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
+        "__default__": reduce(
+            add,
+            [
+                pipeline(
+                    ds.create_pipeline(executor_tag),
+                    inputs={
+                        "example_train_x",
+                        "example_train_y",
+                        "example_test_x",
+                        "example_test_y",
+                    },
+                    namespace=namespace,
+                )
+                for namespace, executor_tag in [
+                    ("alpha", DEFAULT_EXECUTOR),
+                    ("beta", DASK_EXECUTOR),
+                    ("gamma", DASK_EXECUTOR),
+                ]
+            ],
+            data_engineering_pipeline,
+        ),
     }

@@ -33,11 +33,12 @@ Delete this when you start working on your own Kedro project.
 """
 
 from kedro.pipeline import Pipeline, node
+from kedro.symphony.conductor import DEFAULT_EXECUTOR
 
 from .nodes import predict, report_accuracy, train_model
 
 
-def create_pipeline(**kwargs):
+def create_pipeline(executor_tag: str = DEFAULT_EXECUTOR, **kwargs):
     return Pipeline(
         [
             node(
@@ -45,21 +46,19 @@ def create_pipeline(**kwargs):
                 ["example_train_x", "example_train_y", "parameters"],
                 "example_model",
                 name="train",
-                tags=["executor:kedro.symphony.executor.dask_executor.DaskExecutor"],
             ),
             node(
                 predict,
                 dict(model="example_model", test_x="example_test_x"),
                 "example_predictions",
                 name="predict",
-                tags=["executor:kedro.symphony.executor.dask_executor.DaskExecutor"],
             ),
             node(
                 report_accuracy,
                 ["example_predictions", "example_test_y"],
                 None,
                 name="report",
-                tags=["executor:kedro.symphony.executor.dask_executor.DaskExecutor"],
             ),
-        ]
+        ],
+        tags=executor_tag,
     )
