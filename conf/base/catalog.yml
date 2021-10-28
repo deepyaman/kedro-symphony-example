@@ -57,3 +57,7 @@ beta.example_predictions:
 gamma.example_predictions:
   type: pickle.PickleDataSet
   filepath: data/07_model_output/gamma_pred.pkl
+
+example_report:
+  type: pandas.CSVDataSet
+  filepath: data/08_reporting/report.csv

@@ -35,6 +35,7 @@ from kedro.pipeline import Pipeline, pipeline
 from kedro.symphony.conductor import DEFAULT_EXECUTOR
 
 from new_kedro_project.pipelines import data_engineering as de
+from new_kedro_project.pipelines import data_partner as dp
 from new_kedro_project.pipelines import data_science as ds
 
 DASK_EXECUTOR = "executor:kedro.symphony.executor.dask_executor.DaskExecutor"
@@ -49,6 +50,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """
     data_engineering_pipeline = de.create_pipeline()
     data_science_pipeline = ds.create_pipeline()
+    data_partner_pipeline = dp.create_pipeline()
 
     return {
         "de": data_engineering_pipeline,
@@ -73,5 +75,5 @@ def register_pipelines() -> Dict[str, Pipeline]:
                 ]
             ],
             data_engineering_pipeline,
-        ),
+        ) + data_partner_pipeline,
     }
